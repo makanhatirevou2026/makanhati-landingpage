@@ -1,0 +1,121 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ──────────────────────────────────────────────────────────── */
+@theme {
+  /* Brand Colors */
+  --color-brand-burgundy: #8B1A2B;
+  --color-brand-burgundy-dark: #6E1522;
+  --color-brand-gold: #C9A84C;
+  --color-brand-gold-dark: #A8893F;
+  --color-brand-cream: #FAF7F4;
+  --color-brand-sage: #5B7F5B;
+  --color-brand-peach: #D4845A;
+
+  /* Neutrals */
+  --color-brown-900: #2D1810;
+  --color-brown-700: #4A3728;
+  --color-brown-500: #6B5C52;
+  --color-brown-300: #9C8A80;
+  --color-brown-100: #EDE0D4;
+  --color-brown-50: #F9F3EE;
+
+  /* Fonts */
+  --font-sans: var(--font-inter), system-ui, -apple-system, sans-serif;
+  --font-display: var(--font-playfair), Georgia, serif;
+
+  /* Spacing */
+  --radius-card: 1rem;
+  --radius-button: 0.75rem;
+}
+
+/* ─── Base Styles ─────────────────────────────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  html {
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    color: var(--color-brown-900);
+    background-color: #ffffff;
+    overflow-x: hidden;
+  }
+
+  /* Smooth scroll with offset for sticky header */
+  :target {
+    scroll-margin-top: 5rem;
+  }
+
+  /* Focus visible styles */
+  :focus-visible {
+    outline: 2px solid var(--color-brand-burgundy);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-brown-900);
+    line-height: 1.2;
+  }
+
+  p {
+    line-height: 1.7;
+  }
+
+  /* Form elements */
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    opacity: 0.6;
+    filter: invert(0.3) sepia(1) saturate(5) hue-rotate(300deg);
+  }
+
+  input[type="checkbox"] {
+    cursor: pointer;
+  }
+
+  /* Selection color */
+  ::selection {
+    background-color: var(--color-brand-burgundy);
+    color: white;
+  }
+}
+
+/* ─── Utility Classes ─────────────────────────────────────────────────────────── */
+@layer utilities {
+  /* Safe area inset for mobile sticky CTA */
+  .pb-safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* Scroll margin for anchor links with sticky header */
+  .scroll-mt-header {
+    scroll-margin-top: 5rem;
+  }
+}
+
+/* Revision Styling */
+#signup-heading, #how-heading {
+  color:  #ffffff !important;
+}
+
