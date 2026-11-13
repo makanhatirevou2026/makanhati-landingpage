@@ -73,9 +73,9 @@ export const metadata: Metadata = {
     canonical: APP_URL,
   },
   icons: {
-    icon: '/assets/brand/makanhati-logo.webp',
-    shortcut: '/assets/brand/makanhati-logo.webp',
-    apple: '/assets/brand/makanhati-logo.webp',
+    icon: '/assets/brand/makanhati-logo.png',
+  shortcut: '/assets/brand/makanhati-logo.png',
+  apple: '/assets/brand/makanhati-logo.png',
   },
   manifest: '/site.webmanifest',
 };
