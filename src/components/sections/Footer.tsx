@@ -104,7 +104,7 @@ export function Footer() {
           </nav>
 
           <p className="footer-copyright">
-            © {new Date().getFullYear()} MakanHati
+            © 2026 MakanHati
           </p>
         </div>
 
