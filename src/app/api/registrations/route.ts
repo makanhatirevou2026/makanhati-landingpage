@@ -5,7 +5,7 @@ import { type NextRequest } from 'next/server';
 import { registrationApiSchema } from '@/lib/validation';
 import { generateRequestId, sanitizeInput } from '@/lib/utils';
 
-export const runtime = 'nodejs';
+
 
 interface RegistrationRecord {
   id: string;
