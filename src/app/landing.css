@@ -498,3 +498,17 @@ details[open] summary:after{content:'−';background:var(--wine);color:var(--pap
  .price-option .duration-label{flex-direction:column;align-items:flex-start;gap:4px}.price-option>div>span{font-size:.68rem}.compact-package{padding:21px}.compact-prices strong{font-size:1.25rem}
 }
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}html{scroll-behavior:auto}}
+/* Confirmed registration dialog: native top layer keeps it above sticky CTAs. */
+.registration-dialog{width:calc(100% - 40px);max-width:510px;max-height:calc(100dvh - 40px);margin:auto;padding:36px;background:var(--paper);color:var(--wine);border:2px solid var(--wine);border-radius:22px 8px 22px 8px;box-shadow:9px 9px 0 var(--butter);overflow:auto;text-align:center}
+.registration-dialog:not([open]){display:none}
+.registration-dialog::backdrop{background:rgb(59 28 35 / 65%)}
+.registration-dialog-heart{width:62px;margin:0 auto 12px;color:var(--wine)}
+.registration-dialog-heart svg{display:block;width:100%;height:auto}
+.registration-dialog-kicker{font-size:.65rem;font-weight:750;letter-spacing:.12em;text-transform:uppercase}
+.registration-dialog h2{font-size:clamp(2.5rem,7vw,3.5rem);line-height:1.05;margin:14px 0 20px;letter-spacing:-.045em}
+.registration-dialog h2 em{font-family:MakanDisplay,Georgia,serif;font-weight:400}
+.registration-dialog>p:not(.registration-dialog-kicker){font-size:.95rem;line-height:1.7}
+.registration-dialog .registration-dialog-note{font-size:.79rem!important;color:var(--muted);margin-top:13px}
+.registration-dialog small{display:block;font-size:.64rem;line-height:1.6;overflow-wrap:anywhere;margin:20px 0;color:var(--muted)}
+.registration-dialog .btn{width:100%;min-height:48px;justify-content:center}
+@media(max-width:560px){.registration-dialog{width:calc(100% - 32px);padding:27px 22px;box-shadow:6px 6px 0 var(--butter)}}

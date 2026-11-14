@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
 import './globals.css';
+import { APP_URL, INDEXABLE } from '@/lib/site-config.mjs';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -14,7 +15,6 @@ const playfair = Playfair_Display({
   display: 'swap',
 });
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://makanhati.com';
 const PAGE_TITLE = 'Catering Harian Kuningan, Jakarta Selatan | MakanHati';
 const PAGE_DESCRIPTION =
   'Segera hadir di Kuningan: catering harian dengan menu rumahan yang berganti setiap hari. Pilih rasa gurih, pedas, atau creamy dan daftar untuk mendapatkan informasi promo launching MakanHati.';
@@ -37,11 +37,11 @@ export const metadata: Metadata = {
   creator: 'MakanHati',
   publisher: 'MakanHati',
   robots: {
-    index: true,
-    follow: true,
+    index: INDEXABLE,
+    follow: INDEXABLE,
     googleBot: {
-      index: true,
-      follow: true,
+      index: INDEXABLE,
+      follow: INDEXABLE,
       'max-video-preview': -1,
       'max-image-preview': 'large',
       'max-snippet': -1,
