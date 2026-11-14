@@ -30,6 +30,7 @@ Buka `http://localhost:3000`.
 
 ```bash
 npm run lint
+npm test
 npm run build
 ```
 
@@ -52,32 +53,32 @@ Form pada desain terbaru adalah form pendaftaran minat, bukan checkout atau peme
 
 Endpoint form: `POST /api/registrations`.
 
-### Penyimpanan saat development
+### Penyimpanan Google Sheets
 
-Saat `npm run dev`, data pendaftaran disimpan secara lokal ke `.local-data/registrations.json`. Folder `.local-data` masuk `.gitignore` karena berisi data pribadi.
+Form mengirim ke API server Next.js, lalu server meneruskan data ke web app Google Apps Script. Nama, Instagram, persetujuan, waktu dan ID pendaftaran disimpan di Sheet privat milik MakanHati. Endpoint dan kunci hanya ada di server; browser tidak memanggil Apps Script secara langsung.
 
-Endpoint memakai validasi Zod, rate limiting, honeypot, dan idempotency key. Jangan mengandalkan file JSON lokal sebagai database produksi.
+Atur `APPS_SCRIPT_URL` ke URL web app `/exec` dan `REGISTRATION_SECRET` ke kunci yang sama dengan Script Properties Apps Script. Jangan awali kedua variabel itu dengan `NEXT_PUBLIC_`, jangan commit nilai kuncinya, dan jangan unggah `.env.local`. UTM mentah, paket, harga, WhatsApp dan alamat tidak dikirim ke Sheet.
 
-### Sebelum mengaktifkan form di production
+### Konfirmasi dan retry
 
-Penyimpanan database permanen belum dihubungkan. Karena itu endpoint `/api/registrations` sengaja mengembalikan HTTP `503` pada environment production, alih-alih menampilkan pesan sukses palsu.
+Pop-up terima kasih hanya muncul setelah Apps Script mengonfirmasi `success:true`, `persisted:true`, storage Google Sheets, ID yang sesuai dan waktu penyimpanan. HTTP 200 berisi halaman login atau kegagalan penyimpanan tetap dianggap gagal. Isian dan idempotency key dipertahankan saat gagal agar retry tidak menambah baris ganda. ID stabil lintas instance server; Apps Script mengunci dan membaca ulang data sebelum sukses.
 
-Sebelum form digunakan pengunjung, hubungkan route tersebut ke database permanen (misalnya Supabase/Postgres), siapkan kontrol akses untuk admin, serta tetapkan kebijakan retensi dan penghapusan data.
+Validasi Zod, pemeriksaan origin, batas ukuran body, honeypot dan pembatas 5 percobaan/jam per IP per instance tetap tersedia. Pembatas lokal ini bukan pembatas terdistribusi; untuk trafik besar gunakan perlindungan terdistribusi/aturan platform yang sesuai. Konfigurasi hilang, token salah atau upstream tidak terkonfirmasi menghasilkan `persisted:false`; tidak ada fallback filesystem production. Retensi data, notifikasi admin dan pengukuran eksternal belum diaktifkan oleh integrasi ini.
 
 ## SEO dan Web Crawling
 
 - Metadata `title`, `description`, canonical, Open Graph, Twitter Card, dan robots dikelola dari `src/app/layout.tsx`.
-- `src/app/robots.ts` mengizinkan crawling halaman publik dan memblokir `/api/` serta `/admin/`.
-- `src/app/sitemap.ts` hanya mencantumkan halaman utama karena halaman legal saat ini memiliki metadata `noindex`.
+- Preview dan domain tes tetap noindex. Aktifkan `SEO_INDEXING_ENABLED=true` hanya pada production ketika domain utama siap. `VERCEL_ENV=preview` tetap dipaksa noindex.
+- Saat indexing aktif, robots mengizinkan halaman publik dan memblokir API/admin serta legal draft; sitemap hanya mencantumkan halaman utama.
 - Konten utama landing page dirender melalui Server Components. Interaktivitas dibatasi pada navigasi mobile, form, menu harian, FAQ, dan CTA mobile.
 - FAQ dilengkapi structured data JSON-LD `FAQPage`.
 - Pastikan `NEXT_PUBLIC_APP_URL` mengarah ke domain kanonis yang benar sebelum production.
 
-## Deployment ke Netlify
+## Deployment ke Vercel
 
-Jangan deploy dengan mengunggah folder HTML export atau folder `.next` secara manual jika website memerlukan API route. Hubungkan repository Next.js ke Netlify dan gunakan build/runtime Next.js agar App Router serta endpoint API berjalan sebagai aplikasi Next.js.
+Hubungkan repo tim `makanhatirevou2026/makanhati-landingpage`, branch production `master`, dengan Framework Preset **Next.js**. Root Directory kosong, build/install/output default Next.js. Set `NEXT_PUBLIC_APP_URL=https://makanhati.my.id`, `SEO_INDEXING_ENABLED=false`, `APPS_SCRIPT_URL` dan `REGISTRATION_SECRET` sebelum redeploy. Kunci harus sama persis dengan yang disimpan pada Apps Script.
 
-Form produksi belum aktif sampai database permanen dihubungkan.
+Jangan mengunggah HTML statis atau folder `.next` secara manual karena form membutuhkan runtime API Next.js. Perubahan environment memerlukan deployment baru. Domain/DNS tidak berubah hanya karena canonical diatur.
 
 ## Struktur Project
 

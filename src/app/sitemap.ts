@@ -1,7 +1,9 @@
 import type { MetadataRoute } from 'next';
+import { APP_URL, INDEXABLE } from '@/lib/site-config.mjs';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://makanhati.com';
+  if (!INDEXABLE) return [];
+  const baseUrl = APP_URL;
 
   return [
     {

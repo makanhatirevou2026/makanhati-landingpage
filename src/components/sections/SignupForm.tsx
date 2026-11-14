@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { registrationFormSchema } from '@/lib/validation';
-import { captureUtmParams, generateIdempotencyKey } from '@/lib/utils';
+import { generateIdempotencyKey } from '@/lib/utils';
 import { trackRegistrationFormStart, trackRegistrationFormView, trackGenerateLead } from '@/lib/analytics';
 
 type RegistrationFormValues = z.infer<typeof registrationFormSchema>;
@@ -16,9 +16,26 @@ export function SignupForm() {
   const sectionRef = useRef<HTMLElement>(null);
   const hasStarted = useRef(false);
   const idempotencyKey = useRef('');
+  const submittingRef = useRef(false);
+  const leadIdRef = useRef('');
+  const thankYouDialogRef = useRef<HTMLDialogElement>(null);
+  const successSummaryRef = useRef<HTMLDivElement>(null);
   const [status, setStatus] = useState<FormStatus>('idle');
   const [statusMessage, setStatusMessage] = useState('');
   const [registrationId, setRegistrationId] = useState('');
+
+  useEffect(() => {
+    if (status !== 'success') return;
+    const dialog = thankYouDialogRef.current;
+    if (!dialog) return;
+    const previousOverflow = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    dialog.showModal();
+    return () => {
+      document.documentElement.style.overflow = previousOverflow;
+      if (dialog.open) dialog.close();
+    };
+  }, [status]);
 
   const {
     register,
@@ -59,10 +76,11 @@ export function SignupForm() {
   };
 
   const onSubmit = async (values: RegistrationFormValues) => {
+    if (submittingRef.current) return;
+    submittingRef.current = true;
     setStatus('submitting');
     setStatusMessage('');
 
-    const utm = captureUtmParams();
     if (!idempotencyKey.current) idempotencyKey.current = generateIdempotencyKey();
 
     try {
@@ -72,29 +90,32 @@ export function SignupForm() {
           'Content-Type': 'application/json',
           'Idempotency-Key': idempotencyKey.current,
         },
-        body: JSON.stringify({
-          ...values,
-          utmSource: utm.utmSource,
-          utmMedium: utm.utmMedium,
-          utmCampaign: utm.utmCampaign,
-        }),
+        body: JSON.stringify(values),
+        signal: AbortSignal.timeout(30000),
       });
 
       const result = await response.json().catch(() => null);
-      if (!response.ok || result?.success !== true || result?.persisted !== true || typeof result?.registrationId !== 'string') {
+      if (!response.ok || result?.success !== true || result?.persisted !== true || result?.storage !== 'google-sheets' ||
+          typeof result?.registrationId !== 'string' || !/^[0-9a-f-]{36}$/.test(result.registrationId)) {
         throw new Error(result?.error || 'Pendaftaran belum berhasil disimpan. Silakan coba kembali.');
       }
 
       setRegistrationId(result.registrationId);
       setStatus('success');
-      trackGenerateLead('waitlist', utm.utmCampaign);
+      if (leadIdRef.current !== result.registrationId) {
+        leadIdRef.current = result.registrationId;
+        try { trackGenerateLead('waitlist'); } catch { /* Analytics cannot undo a saved registration. */ }
+      }
     } catch (error) {
       setStatus('error');
       setStatusMessage(error instanceof Error ? error.message : 'Terjadi kendala. Silakan coba kembali.');
+    } finally {
+      submittingRef.current = false;
     }
   };
 
   const registerAnother = () => {
+    thankYouDialogRef.current?.close();
     reset();
     setStatus('idle');
     setStatusMessage('');
@@ -104,6 +125,7 @@ export function SignupForm() {
   };
 
   return (
+    <>
     <section className="signup-section" id="pesan" ref={sectionRef} aria-labelledby="signup-heading">
       <div className="container">
         <div className="signup-shell">
@@ -122,7 +144,7 @@ export function SignupForm() {
 
           <div className="signup-card">
             {status === 'success' ? (
-              <div className="signup-success" role="status" tabIndex={-1}>
+              <div className="signup-success" role="status" tabIndex={-1} ref={successSummaryRef}>
                 <div>
                   <h3>Pendaftaran kamu diterima!</h3>
                   <p>Data pendaftaran berhasil disimpan. Pendaftaran ini belum merupakan pemesanan makanan; pilihan paket akan dibahas saat tim MakanHati menghubungi kamu.</p>
@@ -135,7 +157,7 @@ export function SignupForm() {
                 id="signup-form"
                 aria-label="Form pendaftaran MakanHati"
                 noValidate
-                onSubmit={handleSubmit(onSubmit)}
+                onSubmit={(event) => { void handleSubmit(onSubmit)(event); }}
                 onFocusCapture={handleFirstInteraction}
                 onChangeCapture={handleFirstInteraction}
                 aria-busy={status === 'submitting'}
@@ -148,6 +170,7 @@ export function SignupForm() {
                       autoComplete="name"
                       placeholder="Nama lengkapmu"
                       maxLength={100}
+                      disabled={status === 'submitting'}
                       aria-invalid={Boolean(errors.customerName)}
                       aria-describedby="name-error"
                       {...register('customerName')}
@@ -163,6 +186,7 @@ export function SignupForm() {
                       spellCheck={false}
                       placeholder="@usernamekamu"
                       maxLength={31}
+                      disabled={status === 'submitting'}
                       aria-invalid={Boolean(errors.instagramUsername)}
                       aria-describedby="instagram-error"
                       {...register('instagramUsername')}
@@ -179,7 +203,7 @@ export function SignupForm() {
                 <div className="signup-bottom">
                   <div>
                     <label className="consent" htmlFor="consent">
-                      <input id="consent" type="checkbox" aria-invalid={Boolean(errors.consent)} aria-describedby="consent-error" {...register('consent')} />
+                      <input id="consent" type="checkbox" disabled={status === 'submitting'} aria-invalid={Boolean(errors.consent)} aria-describedby="consent-error" {...register('consent')} />
                       <span>Dengan mencentang kotak ini, kamu menyetujui <a href="/kebijakan-privasi" target="_blank" rel="noopener noreferrer">Kebijakan Privasi</a> dan penggunaan nama serta username Instagram kamu untuk proses pendaftaran.</span>
                     </label>
                     <p className="field-error" id="consent-error">{errors.consent?.message ?? ''}</p>
@@ -199,5 +223,26 @@ export function SignupForm() {
         </div>
       </div>
     </section>
+    <dialog
+      ref={thankYouDialogRef}
+      className="registration-dialog"
+      aria-labelledby="registration-thank-you-title"
+      aria-describedby="registration-thank-you-description"
+      onClose={() => {
+        document.documentElement.style.overflow = '';
+        successSummaryRef.current?.focus();
+      }}
+    >
+      <div className="registration-dialog-heart" aria-hidden="true">
+        <svg viewBox="0 0 100 90" fill="none"><path d="M50 79C28 64 7 48 9 28 11 8 34 4 50 21 66 4 89 8 91 28c2 20-19 36-41 51Z" stroke="currentColor" strokeWidth="4" strokeLinejoin="round" /></svg>
+      </div>
+      <p className="registration-dialog-kicker">MakanHati · Pendaftaran</p>
+      <h2 id="registration-thank-you-title">Terima <em>kasih!</em></h2>
+      <p id="registration-thank-you-description">Pendaftaran kamu sudah kami terima dan datanya berhasil disimpan.</p>
+      <p className="registration-dialog-note">Pendaftaran ini bukan pemesanan makanan. Pilihan paket akan dibahas saat tim MakanHati menghubungi kamu.</p>
+      <small>ID pendaftaran: {registrationId}</small>
+      <button className="btn" type="button" autoFocus onClick={() => thankYouDialogRef.current?.close()}>Tutup</button>
+    </dialog>
+    </>
   );
 }
