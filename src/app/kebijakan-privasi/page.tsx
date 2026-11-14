@@ -34,7 +34,7 @@ export default function PrivacyPage() {
             Kebijakan Privasi
           </h1>
           <p className="text-[#9C8A80] text-sm mb-8">
-            Terakhir diperbarui: 12 November 2026
+            Terakhir diperbarui: 14 November 2026
           </p>
 
           {/* TODO: Replace with actual privacy policy content approved by legal/operations */}
@@ -54,28 +54,27 @@ export default function PrivacyPage() {
               Data yang Kami Kumpulkan
             </h2>
             <p>
-              Saat kamu mengisi form pemesanan, kami mengumpulkan data yang
-              diperlukan untuk memproses permintaan catering, antara lain nama,
-              nomor WhatsApp, username Instagram, alamat pengiriman, dan
-              preferensi makanan.
+              Saat kamu mengisi form pendaftaran pra-peluncuran, kami mengumpulkan
+              nama lengkap dan username Instagram. Kami juga mencatat waktu
+              pendaftaran, persetujuan privasi, dan ID pendaftaran.
             </p>
 
             <h2 className="text-xl font-bold text-[#2D1810] mt-6 mb-3">
               Penggunaan Data
             </h2>
             <p>
-              Data yang kamu berikan digunakan semata-mata untuk memproses dan
-              mengonfirmasi permintaan pemesanan catering, menghubungi kamu via
-              WhatsApp, dan meningkatkan layanan kami.
+              Data yang kamu berikan digunakan untuk mencatat pendaftaran minat
+              dan keperluan konfirmasi oleh tim MakanHati. Pengisian form ini
+              belum merupakan pemesanan makanan atau pembayaran.
             </p>
 
             <h2 className="text-xl font-bold text-[#2D1810] mt-6 mb-3">
               Keamanan Data
             </h2>
             <p>
-              Kami mengambil langkah-langkah yang wajar untuk melindungi data
-              pribadi kamu dari akses tidak sah. Akses ke data pribadi dibatasi
-              hanya untuk tim admin MakanHati yang berwenang.
+              Data pendaftaran disimpan di Google Sheets melalui Google Apps Script
+              yang dikelola akun MakanHati. Spreadsheet tidak dibagikan ke publik.
+              Akses ke data pribadi dibatasi kepada tim MakanHati yang berwenang.
             </p>
 
             <h2 className="text-xl font-bold text-[#2D1810] mt-6 mb-3">
