@@ -107,7 +107,8 @@ export const registrationFormSchema = z.object({
     .string()
     .trim()
     .min(2, 'Nama lengkap minimal 2 karakter.')
-    .max(100, 'Nama lengkap maksimal 100 karakter.'),
+    .max(100, 'Nama lengkap maksimal 100 karakter.')
+    .refine((value) => !/[\u0000-\u001f\u007f<>]/.test(value), 'Nama lengkap memuat karakter yang tidak valid.'),
   instagramUsername: z
     .string()
     .trim()
